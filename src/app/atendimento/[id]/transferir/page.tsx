@@ -1,16 +1,15 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react"; // Importação do useRef adicionada
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 export default function NewTicketPage() {
   const router = useRouter();
+  const params = useParams();
   const [lstCategoria, setlstCategoria] = useState([]);
   const [tituloState, settituloState] = useState('');
   const [itemperfilState, settemperfilState] = useState(0);
   const [textoState, settextoState] = useState('');
-  const [perfilState, setperfilState] = useState([]);
-  const [perfilselecionado, setperfilselecionado] = useState(-1);
 
 
   // 1. Estados e Referências adicionados para gerenciar o arquivo nativo
@@ -38,33 +37,6 @@ export default function NewTicketPage() {
   }
   const carregarCategoria = async (token: string) => {
     try {
-
-      const resp1 = await fetch(`${process.env.NEXT_PUBLIC_API}/perfil`, {
-        method: 'GET', // Define o método HTTP correto
-        headers: {
-          'Content-Type': 'application/json', // Avisa a API que você está enviando JSON
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const perfil = await resp1.json();
-      if (Array.isArray(perfil)) {
-        const lstperfil = perfil.map((p: any) => ({
-          id: p.id * 1,
-          nome: p.nome,
-          descricao: p.descricao
-        }));
-        setperfilState(lstperfil);
-      }
-
-    }
-    catch (e) {
-      console.log(e);
-    }
-  }
-
-  const recarregaCategoria = async () => {
-    try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API}/itemperfil`, {
         method: 'GET', // Define o método HTTP correto
         headers: {
@@ -91,11 +63,10 @@ export default function NewTicketPage() {
         setlstCategoria(lst);
         //console.log("tickets.length",tickets.length)
       }
-
-    } catch (e) {
+    }
+    catch (e) {
       console.log(e);
     }
-
   }
 
   useEffect(() => {
@@ -105,21 +76,12 @@ export default function NewTicketPage() {
 
   }, [])
 
-  const criarchamado = async () => {
+  const criarservico = async () => {
     try {
 
       const token = Cookies.get('auth_token');
       const idusuario = Cookies.get('idusuario');
 
-      if (tituloState === "") {
-        setPopup({
-          isOpen: true,
-          title: "Erro!",
-          message: "Preencha o campo titulo",
-          type: "error",
-        });
-        return;
-      }
 
       if (itemperfilState === 0) {
         setPopup({
@@ -142,18 +104,14 @@ export default function NewTicketPage() {
       }
 
       let dadosParaEnviar = {
-        titulo: tituloState,
-        servico: {
-          iditemperfil: itemperfilState
-        },
-        mensagem: {
-          idusuario: idusuario * 1,
-          texto: textoState
-        }
-
+        idchamado: params.id,
+        iditemperfil: itemperfilState
       }
+
+
+
       console.log(dadosParaEnviar);
-      const response_abertos = await fetch(`${process.env.NEXT_PUBLIC_API}/chamado`, {
+      const response_abertos = await fetch(`${process.env.NEXT_PUBLIC_API}/servico`, {
         method: 'POST', // Define o método HTTP correto
         headers: {
           'Content-Type': 'application/json', // Avisa a API que você está enviando JSON
@@ -174,7 +132,34 @@ export default function NewTicketPage() {
         });
         return;
       }
-      const dados = await response_abertos.json();
+      dadosParaEnviar = {
+        idchamado: params.id,
+        texto: textoState
+      }
+
+      const response_abertos2 = await fetch(`${process.env.NEXT_PUBLIC_API}/mensagem`, {
+        method: 'POST', // Define o método HTTP correto
+        headers: {
+          'Content-Type': 'application/json', // Avisa a API que você está enviando JSON
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(dadosParaEnviar)
+      }
+      );
+
+
+      if (response_abertos2.status != 201) {
+        console.log(response_abertos);
+        setPopup({
+          isOpen: true,
+          title: `Erro: status ${response_abertos.status}`,
+          message: "Erro na hora de enviar a mensagem",
+          type: "error",
+        });
+        return;
+      }
+      const dados = await response_abertos2.json();
       if (selectedFile) {
         const formData = new FormData();
         console.log(selectedFile);
@@ -192,7 +177,7 @@ export default function NewTicketPage() {
           setPopup({
             isOpen: true,
             title: `Erro de anexagem do arquivo`,
-            message: "Foi aberto o ticket ${dados.id}, mas não foi anexo o arquivo",
+            message: "Foi transferido o chamado tiketi ${params.id}, mas não foi anexo o arquivo",
             type: "error",
           });
           return;
@@ -202,10 +187,10 @@ export default function NewTicketPage() {
       setPopup({
         isOpen: true,
         title: "Ticket aberto com sucesso!",
-        message: `Foi aberto o ticket ${dados.id} para você!`,
+        message: `Foi aberto o ticket ${params.id} para você!`,
         type: "success",
       });
-      setmeulink(`/tickets/${dados.id}`);
+      setmeulink(`/atendimento/${params.id}`);
     } catch (e) {
       console.log(e);
     }
@@ -332,53 +317,14 @@ export default function NewTicketPage() {
               onClick={() => router.push("/")}
               className="text-blue-600 text-lg font-bold hover:opacity-75"
             >
-              ←
+              ⬅️
             </button>
-            <h1 className="text-base font-black text-slate-800">Novo Chamado</h1>
+            <h1 className="text-base font-black text-slate-800">Transferir chamado</h1>
           </div>
 
           <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
 
-            {/* Título do Chamado */}
-            <div>
-              <label className="block text-xs font-extrabold text-slate-700 mb-1.5">
-                Título do Chamado
-              </label>
-              <input
-                value={tituloState}
-                onChange={(e) => settituloState(e.target.value)}
-                type="text"
-                placeholder="Ex: Erro ao acessar o sistema"
-                className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-700 outline-none placeholder-slate-400 focus:border-blue-500 shadow-sm"
-              />
-            </div>
 
-
-
-
-            {/* Categoria */}
-            <div>
-              <label className="block text-xs font-extrabold text-slate-700 mb-1.5">
-                Responsável
-              </label>
-              <div className="relative">
-                <select
-                  value={perfilselecionado}
-                  onChange={(e) => { setperfilselecionado(Number(e.target.value)); recarregaCategoria() }}
-                  className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-500 outline-none appearance-none shadow-sm focus:border-blue-500">
-                  <option >Escolha um serviço</option>
-                  {perfilState.map(perfil => (
-                    <option key={perfil.id} value={perfil.id}>{perfil.nome}</option>
-                  ))}
-                </select>
-                <span className="absolute right-4 top-3.5 text-slate-400 text-[10px]">▼</span>
-              </div>
-            </div>
-
-
-
-
-            {/* Categoria */}
             <div>
               <label className="block text-xs font-extrabold text-slate-700 mb-1.5">
                 Serviço
@@ -466,7 +412,7 @@ export default function NewTicketPage() {
                 type="submit"
                 onClick={async (e) => {
                   e.preventDefault();
-                  await criarchamado();
+                  await criarservico();
                   //router.push("/tickets/new-tickets/success");
                 }}
                 className="w-full bg-blue-600 text-white py-3 rounded-xl text-xs font-bold hover:bg-blue-700 shadow-md shadow-blue-100 transition"

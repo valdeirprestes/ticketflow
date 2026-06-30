@@ -28,7 +28,7 @@ export default function LoginPage() {
     const senha = formData.get("senha");
 
     try {
-
+      console.log(`${process.env.NEXT_PUBLIC_API}/token`);
       const response = await fetch(`${process.env.NEXT_PUBLIC_API}/token`, {
         method: 'POST', // Define o método HTTP correto
         headers: {
@@ -69,6 +69,12 @@ export default function LoginPage() {
 
     } catch (error) {
       console.log("Erro!", error);
+      setPopup({
+        isOpen: true,
+        title: "Erro de login!",
+        message: "Ocorreu algum erro no sistema, por favor tente fazer login mais tarde.",
+        type: "error",
+      });
       //return NextResponse.json({ error: 'Erro ao buscar dados' }, { status: 500 });
     }
     // Aqui no futuro você colocará a validação de e-mail e senha.

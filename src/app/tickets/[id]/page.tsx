@@ -47,7 +47,7 @@ interface ChamadoDados {
 export default function TicketDetailsPage() {
   const router = useRouter();
   const params = useParams();
-  const [meulink, setmeulink] = useState('');
+  
 
   const [chamado, setchamado] = useState<ChamadoDados>({
     status: '',
@@ -88,6 +88,8 @@ export default function TicketDetailsPage() {
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [editText, setEditText] = useState("");
 
+  // Link para redicionar caso ok
+  const [link, setlink] = useState('');
 
   useEffect(() => {
     const token = Cookies.get('auth_token');
@@ -98,7 +100,11 @@ export default function TicketDetailsPage() {
 
   const buscarChamado = async (token: string, id: number) => {
     try {
-      const response_abertos = await fetch(`${process.env.NEXT_PUBLIC_API}/chamado/${id}`, {
+      let filtro = {};
+      filtro.ordem = "descrescente";
+      const query = new URLSearchParams(filtro as any).toString();
+      console.log(query);
+      const response_abertos = await fetch(`${process.env.NEXT_PUBLIC_API}/chamado/${id}?${query}`, {
         method: 'GET', // Define o método HTTP correto
         headers: {
           'Content-Type': 'application/json', // Avisa a API que você está enviando JSON
@@ -155,7 +161,7 @@ export default function TicketDetailsPage() {
         message: `Foi aberto o ticket ${dados.id} para você!`,
         type: "success",
       });
-      setmeulink(`/tickets/${dados.id}`);
+      setlink(`/tickets/${params.id}`);
       return dados;
     } catch (e) {
       console.log(e);
@@ -239,8 +245,8 @@ export default function TicketDetailsPage() {
       titulo: titulo,
       categoria: categoria,
       prioridade: prioridade,
-      create: create,
-      update: update,
+      create: new Date(create).toLocaleString('pt-BR'),
+      update: new Date(update).toLocaleString('pt-BR'),
       responsavel: responsavel,
       solicitante: solicitante,
       inativarbbClose: inativarbbClose,
@@ -264,7 +270,7 @@ export default function TicketDetailsPage() {
         return {
           id: msg.id,
           author: msg.usuario?.nome,
-          date: msg.created_at,
+          date: new Date(msg.created_at).toLocaleString('pt-BR'),
           text: msg.texto,
         }
       }
@@ -279,55 +285,6 @@ export default function TicketDetailsPage() {
 
   const handleCloseTicket = async () => {
     router.push(`/tickets/${params.id}/fechar`)
-    /*
-    try {
-      let dadosParaEnviar = {
-        status: "FECHADO"
-      }
-      const token = Cookies.get('auth_token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API}/chamado/${params.id}`, {
-        method: 'PUT', // Define o método HTTP correto
-        headers: {
-          'Content-Type': 'application/json', // Avisa a API que você está enviando JSON
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(dadosParaEnviar)
-      }
-      );
-      console.log(response);
-      const dados = await response.json();
-      console.log(dados);
-      console.log('dados.status', dados.status);
-      if (dados.status == 200) {
-        setPopup({
-          isOpen: true,
-          title: "Chamado fechado com sucesso!",
-          message: "O chamado foi fechado com sucesso em nosso sistema.",
-          type: "sucess",
-        });
-      }else{
-        setPopup({
-        isOpen: true,
-        title: dados.title,
-        message: dados.detail,
-        type: "erro",
-      });
-
-      }
-
-      //router.refresh();
-    } catch (e) {
-      setPopup({
-        isOpen: true,
-        title: "Ocorreu um erro!",
-        message: "O chamado não foi fechado com sucesso em nosso sistema.",
-        type: "erro",
-      });
-      return;
-    }
-
-    */
   };
 
   const handleReopenTicket = () => {
@@ -392,6 +349,7 @@ export default function TicketDetailsPage() {
 
   const closePopup = () => {
     setPopup((prev) => ({ ...prev, isOpen: false }));
+    if(link) router.push(link);
   };
 
   // 1. Estados e Referências adicionados para gerenciar o arquivo nativo
@@ -516,13 +474,14 @@ export default function TicketDetailsPage() {
               }>Fechar
             </button>
             <button
-              disabled={chamado.inativarbbReOpen}
-              onClick={chamado.inativarbbReOpen ? handleReopenTicket : () => { router.push(`/tickets/${params.id}/reabrir`); }}
+              
+              onClick={chamado.inativarbbReOpen ? ()=> { router.push(`/tickets/${params.id}/transferir`);} : () => { router.push(`/tickets/${params.id}/reabrir`); }}
               className={
                 chamado.inativarbbReOpen ?
-                  "w-full font-bold text-xs py-2.5 rounded-xl transition shadow-sm bg-blue border  border-blue-200 text-blue-600  cursor-not-allowed" :
+                  "w-full text-xs py-2.5 rounded-xl transition shadow-sm bg-rose-500 hover:bg-rose-600 text-white":
                   "w-full text-xs py-2.5 rounded-xl transition shadow-sm bg-emerald-500 hover:bg-emerald-600 text-white"
-              }>Reabrir
+              }>
+                {chamado.inativarbbReOpen ?"Transferir":"Reabrir"}
             </button>
           </div>
 
@@ -598,6 +557,20 @@ export default function TicketDetailsPage() {
               </div>
             </div>
 
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             {/* Botões de Ação */}
             <div className="grid grid-cols-2 gap-3 pt-2">
               <button

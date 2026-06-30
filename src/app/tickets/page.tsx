@@ -101,7 +101,7 @@ export default function TicketsPage() {
           id: chamado.id || 0,
           title: chamado.titulo || " ",
           desc: chamado.servico.descricao || " ",
-          date: chamado.created_at || " ",
+          date: new Date(chamado.created_at).toLocaleString('pt-BR') || " ",
           status: chamado.status,
           priority: getstatus(chamado.prioridade),
           priorityColor: "text-rose-600 bg-rose-50"

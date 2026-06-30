@@ -230,8 +230,8 @@ export default function TicketDetailsPage() {
       titulo: titulo,
       categoria: categoria,
       prioridade: prioridade,
-      create: create,
-      update: update,
+      create: new Date(create).toLocaleString('pt-BR'),
+      update: new Date(update).toLocaleString('pt-BR'),
       responsavel: responsavel,
       solicitante: solicitante,
       inativarbbClose: inativarbbClose,
@@ -255,7 +255,7 @@ export default function TicketDetailsPage() {
         return {
           id: msg.id,
           author: msg.usuario?.nome,
-          date: msg.created_at,
+          date: new Date(msg.created_at).toLocaleString('pt-BR'),
           text: msg.texto,
         }
       }
@@ -529,7 +529,7 @@ export default function TicketDetailsPage() {
               onClick={() => router.push(`/tickets/${params.id}`)}
               className="text-blue-600 text-lg font-bold hover:opacity-75"
             >
-              ←
+              ⬅️
             </button>
             <h1 className="text-base font-black text-slate-800">Retornar ao ticket {params.id}</h1>
           </div>

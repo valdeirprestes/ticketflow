@@ -30,6 +30,7 @@ export default function TicketsPage() {
       if (qtdpagina) filtro = { ...filtro, qtdpagina: qtdpagina };
       if (pagina) filtro = { ...filtro, pagina: pagina };
       if (status) filtro = { ...filtro, status: status };
+      filtro.ordem = "descrescente";
       const query = new URLSearchParams(filtro as any).toString();
       const response_abertos = await fetch(`${process.env.NEXT_PUBLIC_API}/chamado/atendimento?${query}`, {
         method: 'GET', // Define o método HTTP correto
@@ -66,7 +67,7 @@ export default function TicketsPage() {
           id: chamado.id || 0,
           title: chamado.titulo || " ",
           desc: chamado.servico.descricao || " ",
-          date: chamado.created_at || " ",
+          date: new Date(chamado.created_at).toLocaleString('pt-BR') || " ",
           status: chamado.status,
           priority: getstatus(chamado.prioridade),
           priorityColor: "text-rose-600 bg-rose-50"

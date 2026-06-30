@@ -331,11 +331,11 @@ export default function NewTicketPage() {
                       return;
                     }
 
-                    if (fileInputRef) {
+                    if (selectedFile) {
                       const formData = new FormData();
-                      console.log(fileInputRef);
-                      formData.append("anexo", fileInputRef);
-                      const response = await fetch(`${process.env.NEXT_PUBLIC_API}/anexodamensagem/${dados.id}`, {
+                      console.log(selectedFile);
+                      formData.append("anexo", selectedFile);
+                      const response = await fetch(`${process.env.NEXT_PUBLIC_API}/anexodamensagem/${dados3.id}`, {
                         method: 'POST',
                         headers: {
                           'Accept': 'application/json',
@@ -344,7 +344,7 @@ export default function NewTicketPage() {
                         body: formData // Passamos o formData diretamente aqui
                       });
                       console.log(response);
-                      if (response.status != 200) {
+                      if (response.status != 201) {
                         setPopup({
                           isOpen: true,
                           title: `Erro de anexagem do arquivo`,

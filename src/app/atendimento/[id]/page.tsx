@@ -97,7 +97,11 @@ export default function TicketDetailsPage() {
 
   const buscarChamado = async (token: string, id: number) => {
     try {
-      const response_abertos = await fetch(`${process.env.NEXT_PUBLIC_API}/chamado/${id}`, {
+      let filtro = {};
+      filtro.ordem = "descrescente";
+      const query = new URLSearchParams(filtro as any).toString();
+      console.log(query);
+      const response_abertos = await fetch(`${process.env.NEXT_PUBLIC_API}/chamado/${id}?${query}`, {
         method: 'GET', // Define o método HTTP correto
         headers: {
           'Content-Type': 'application/json', // Avisa a API que você está enviando JSON
@@ -200,8 +204,8 @@ export default function TicketDetailsPage() {
     else if (dadoschamado.status === "FECHADO") status = "Fechado";
     categoria = servico.itemperfil.nome || "nomerrado";
     prioridade = getstatus(dadoschamado.prioridade || "prioridaderrado");
-    create = dadoschamado.updated_at;
-    update = dadoschamado.updated_at;
+    create = new Date(dadoschamado.updated_at);
+    update = new Date(dadoschamado.updated_at);
 
     responsavel = servico.itemperfil.perfil.nome || 'nomeerradoperfil';
     solicitante = dadoschamado.usuario.nome;
@@ -228,8 +232,8 @@ export default function TicketDetailsPage() {
       titulo: titulo,
       categoria: categoria,
       prioridade: prioridade,
-      create: create,
-      update: update,
+      create: create.toLocaleString('pt-BR'),
+      update: update.toLocaleString('pt-BR'),
       responsavel: responsavel,
       solicitante: solicitante,
       inativarbbClose: inativarbbClose,
@@ -253,8 +257,8 @@ export default function TicketDetailsPage() {
         return {
           id: msg.id,
           author: msg.usuario?.nome,
-          date: msg.created_at,
-          text: msg.texto,
+          date: new Date(msg.created_at).toLocaleString('pt-BR'),
+          text: msg.texto
         }
       }
 
@@ -353,6 +357,8 @@ export default function TicketDetailsPage() {
     }
   };
 
+  const handleTransTicket = () => router.push(`/atendimento/${params.id}/transferir`)
+
 
   return (
     <div className="min-h-screen bg-slate-100 flex justify-center items-center p-0 sm:p-4">
@@ -444,6 +450,18 @@ export default function TicketDetailsPage() {
           </div>
 
 
+
+
+
+           <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick=
+              {handleTransTicket}
+              className=
+                "w-full text-xs py-2.5 rounded-xl transition shadow-sm bg-rose-500 hover:bg-rose-600 text-white"
+              >Transferir
+            </button>
+          </div>
 
 
 
