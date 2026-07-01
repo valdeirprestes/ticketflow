@@ -1,10 +1,47 @@
 "use client";
 
-import React from "react";
-import { useRouter } from "next/navigation";
-
+import React, { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 export default function ProfilePage() {
+  const params = useParams();
   const router = useRouter();
+  const [nome,setnome] = useState('');
+  const [telefone,settelefone] = useState('');
+  const [email, setemail] = useState('');
+  const [perfil, setperfil] = useState('');
+  const [criado, setcriado] = useState('')
+
+
+  const carregar = async () => {
+    try{
+      const token = Cookies.get("auth_token");
+      const resp = await fetch(`${process.env.NEXT_PUBLIC_API}/usuario${params.id}`, {
+        method: 'GET', // Define o método HTTP correto
+        headers: {
+          'Content-Type': 'application/json', // Avisa a API que você está enviando JSON
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const usuario = await resp.json();
+      if(usuario){
+        setnome(usuario.nome || "");
+        settelefone(usuario.telefone || "");
+        setemail(usuario.email || "");
+        setperfil("teste" || "");
+        setcriado(usuario.created_at || "");
+
+      }
+    }catch(e){
+      console.log(e);
+    }
+  }
+
+  useEffect(()=>{
+    const rodar = async () => carregar();
+    rodar();
+  },[])
 
   return (
     <div className="min-h-screen bg-slate-100 flex justify-center items-center p-0 sm:p-4">
@@ -60,9 +97,9 @@ export default function ProfilePage() {
             <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-black shadow-md shadow-blue-600/10">
               RCS
             </div>
-            <h2 className="text-lg font-extrabold text-slate-800 mt-3 tracking-tight">Ricardo Cesar de Souza</h2>
-            <p className="text-xs text-slate-400 mt-0.5">ricardo.souza@empresa.com</p>
-            <p className="text-[11px] font-medium text-slate-500 mt-1">TI - Desenvolvimento</p>
+            <h2 className="text-lg font-extrabold text-slate-800 mt-3 tracking-tight">{nome}</h2>
+            <p className="text-xs text-slate-400 mt-0.5">{email}</p>
+            <p className="text-[11px] font-medium text-slate-500 mt-1">{perfil}</p>
           </div>
 
           {/* Informações Pessoais */}

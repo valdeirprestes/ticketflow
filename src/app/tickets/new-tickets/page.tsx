@@ -65,6 +65,7 @@ export default function NewTicketPage() {
 
   const recarregaCategoria = async () => {
     try {
+      const token = Cookies.get("auth_token");
       const response = await fetch(`${process.env.NEXT_PUBLIC_API}/itemperfil`, {
         method: 'GET', // Define o método HTTP correto
         headers: {
@@ -79,6 +80,7 @@ export default function NewTicketPage() {
         const lst = itensperfil.map((itemperfil: any) => (
           {
             id: itemperfil.id || 0,
+            idperfil: itemperfil.idperfil,
             title: itemperfil.titulo || " ",
             desc: itemperfil.descricao || " ",
             date: itemperfil.created_at || " ",
@@ -332,7 +334,7 @@ export default function NewTicketPage() {
               onClick={() => router.push("/")}
               className="text-blue-600 text-lg font-bold hover:opacity-75"
             >
-              ←
+              ⬅️
             </button>
             <h1 className="text-base font-black text-slate-800">Novo Chamado</h1>
           </div>
@@ -390,7 +392,9 @@ export default function NewTicketPage() {
                   className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-500 outline-none appearance-none shadow-sm focus:border-blue-500">
                   <option >Escolha um serviço</option>
                   {lstCategoria.map(categoria => (
-                    <option key={categoria.id} value={categoria.id}>{categoria.desc}</option>
+                    categoria.idperfil == perfilselecionado?
+                    (<option key={categoria.id} value={categoria.id}>{categoria.desc}</option>):
+                    null
                   ))}
                 </select>
                 <span className="absolute right-4 top-3.5 text-slate-400 text-[10px]">▼</span>

@@ -10,6 +10,8 @@ export default function NewTicketPage() {
   const [tituloState, settituloState] = useState('');
   const [itemperfilState, settemperfilState] = useState(0);
   const [textoState, settextoState] = useState('');
+  const [perfilState, setperfilState] = useState([]);
+  const [perfilselecionado, setperfilselecionado] = useState(-1);
 
 
   // 1. Estados e Referências adicionados para gerenciar o arquivo nativo
@@ -37,6 +39,34 @@ export default function NewTicketPage() {
   }
   const carregarCategoria = async (token: string) => {
     try {
+      const resp1 = await fetch(`${process.env.NEXT_PUBLIC_API}/perfil`, {
+        method: 'GET', // Define o método HTTP correto
+        headers: {
+          'Content-Type': 'application/json', // Avisa a API que você está enviando JSON
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const perfil = await resp1.json();
+      if (Array.isArray(perfil)) {
+        const lstperfil = perfil.map((p: any) => ({
+          id: p.id * 1,
+          nome: p.nome,
+          descricao: p.descricao
+        }));
+        setperfilState(lstperfil);
+      }
+    }
+    catch (e) {
+      console.log(e);
+    }
+  }
+
+
+
+  const recarregaCategoria = async () => {
+    try {
+      const token = Cookies.get("auth_token");
       const response = await fetch(`${process.env.NEXT_PUBLIC_API}/itemperfil`, {
         method: 'GET', // Define o método HTTP correto
         headers: {
@@ -51,6 +81,7 @@ export default function NewTicketPage() {
         const lst = itensperfil.map((itemperfil: any) => (
           {
             id: itemperfil.id || 0,
+            idperfil: itemperfil.idperfil,
             title: itemperfil.titulo || " ",
             desc: itemperfil.descricao || " ",
             date: itemperfil.created_at || " ",
@@ -63,11 +94,13 @@ export default function NewTicketPage() {
         setlstCategoria(lst);
         //console.log("tickets.length",tickets.length)
       }
-    }
-    catch (e) {
+
+    } catch (e) {
       console.log(e);
     }
+
   }
+
 
   useEffect(() => {
     const token = Cookies.get('auth_token');
@@ -187,10 +220,10 @@ export default function NewTicketPage() {
       setPopup({
         isOpen: true,
         title: "Ticket aberto com sucesso!",
-        message: `Foi aberto o ticket ${params.id} para você!`,
+        message: `Foi transferido o ticket ${params.id} para você!`,
         type: "success",
       });
-      setmeulink(`/atendimento/${params.id}`);
+      setmeulink(`/tickets/${params.id}`);
     } catch (e) {
       console.log(e);
     }
@@ -325,6 +358,30 @@ export default function NewTicketPage() {
           <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
 
 
+
+            {/* Categoria */}
+            <div>
+              <label className="block text-xs font-extrabold text-slate-700 mb-1.5">
+                Responsável
+              </label>
+              <div className="relative">
+                <select
+                  value={perfilselecionado}
+                  onChange={(e) => { setperfilselecionado(Number(e.target.value)); recarregaCategoria() }}
+                  className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-500 outline-none appearance-none shadow-sm focus:border-blue-500">
+                  <option >Escolha um serviço</option>
+                  {perfilState.map(perfil => (
+                    <option key={perfil.id} value={perfil.id}>{perfil.nome}</option>
+                  ))}
+                </select>
+                <span className="absolute right-4 top-3.5 text-slate-400 text-[10px]">▼</span>
+              </div>
+            </div>
+
+
+
+
+            {/* Categoria */}
             <div>
               <label className="block text-xs font-extrabold text-slate-700 mb-1.5">
                 Serviço
@@ -336,7 +393,9 @@ export default function NewTicketPage() {
                   className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-500 outline-none appearance-none shadow-sm focus:border-blue-500">
                   <option >Escolha um serviço</option>
                   {lstCategoria.map(categoria => (
-                    <option key={categoria.id} value={categoria.id}>{categoria.desc}</option>
+                    categoria.idperfil == perfilselecionado ?
+                      (<option key={categoria.id} value={categoria.id}>{categoria.desc}</option>) :
+                      null
                   ))}
                 </select>
                 <span className="absolute right-4 top-3.5 text-slate-400 text-[10px]">▼</span>
