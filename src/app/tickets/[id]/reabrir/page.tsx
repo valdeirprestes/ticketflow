@@ -253,7 +253,7 @@ export default function NewTicketPage() {
                     e.preventDefault();
                     const token = Cookies.get('auth_token');
                     const idusuario = Cookies.get('idusuario');
-                    let dadosParaEnviar = { status: "ABERTO" };
+                    let dadosParaEnviar = { status: "PENDENTE" };
 
                     
                     const response = await fetch(`${process.env.NEXT_PUBLIC_API}/chamado/${params.id}`, {

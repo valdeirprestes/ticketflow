@@ -91,8 +91,8 @@ export default function TicketsPage() {
     let ObjFiltro = { qtdpagina: 5, pagina: 1 };
     if (tagtite !== "") ObjFiltro.titulo = tagtite;
     if (statusFiltro === "Abertos") ObjFiltro.status = "ABERTO";
-    if (statusFiltro === "Em Andamento") ObjFiltro.status = "ANDAMENTO";
-    if (statusFiltro === "Fechados") ObjFiltro.status = "FECHADO";
+    else if (statusFiltro === "Pendentes") ObjFiltro.status = "PENDENTE";
+    else if (statusFiltro === "Devolvidos") ObjFiltro.status = "DEVOLVIDO";
     const dadoschamados = await buscarChamados(token, ObjFiltro);
 
     if (Array.isArray(dadoschamados)) {
@@ -247,7 +247,7 @@ export default function TicketsPage() {
 
           {/* Filtros horizontais em carrossel */}
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-            {["Todos", "Abertos", "Em Andamento", "Fechados"].map((filter) => (
+            {["Todos", "Pendentes", "Devolvidos", "Fechados"].map((filter) => (
               <button
                 key={filter}
                 onClick={

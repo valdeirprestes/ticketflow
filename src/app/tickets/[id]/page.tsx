@@ -212,8 +212,8 @@ export default function TicketDetailsPage() {
 
     titulo = dadoschamado.titulo || "titulo";
     let servico = dadoschamado.servico[dadoschamado.servico.length - 1] || "";
-    if (dadoschamado.status === "ANDAMENTO") status = "Em Andamento";
-    else if (dadoschamado.status === "ABERTO") status = "Aberto";
+    if (dadoschamado.status === "PENDENTE") status = "Pendente";
+    else if (dadoschamado.status === "DEVOLVIDO") status = "Devolvido";
     else if (dadoschamado.status === "FECHADO") status = "Fechado";
     categoria = servico.itemperfil.nome || "nomerrado";
     prioridade = getstatus(dadoschamado.prioridade || "prioridaderrado");
@@ -222,6 +222,7 @@ export default function TicketDetailsPage() {
 
     responsavel = servico.itemperfil.perfil.nome || 'nomeerradoperfil';
     solicitante = dadoschamado.usuario.nome;
+    //status = chamado.status
 
     let inativarbbClose, inativarbbAnexar, inativarbbComentar, inativarbbReOpen;
     //console.log('primeiramensagem' , dadoschamado.mensagem[0]);
@@ -457,6 +458,7 @@ export default function TicketDetailsPage() {
               <div className="flex justify-between"><span className="text-slate-400">Última atualização</span><span className="font-medium text-slate-700">{chamado.update}</span></div>
               <div className="flex justify-between"><span className="text-slate-400">Responsável</span><span className="font-bold text-slate-700">{chamado.responsavel}</span></div>
               <div className="flex justify-between"><span className="text-slate-400">Solicitante</span><span className="font-bold text-slate-700">{chamado.solicitante}</span></div>
+              <div className="flex justify-between"><span className="text-slate-400">Status</span><span className="font-bold text-slate-700">{chamado.status}</span></div>
             </div>
           </div>
 
